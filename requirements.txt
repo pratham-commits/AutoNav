@@ -2,4 +2,4 @@ opencv-python
 ultralytics
 transformers
 timm
-scipys
+scipy
