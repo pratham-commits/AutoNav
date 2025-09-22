@@ -3,3 +3,7 @@ ultralytics
 transformers
 timm
 scipys
+torch
+paho-mqtt
+Pillow
+numpy
