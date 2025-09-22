@@ -1,9 +1,9 @@
 opencv-python
 ultralytics
+torch
 transformers
 timm
-scipys
-torch
+scipy
 paho-mqtt
 Pillow
 numpy
