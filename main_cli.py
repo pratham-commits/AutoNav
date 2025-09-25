@@ -52,13 +52,23 @@ class VisionSystem:
     def select_target(self, frame, objects, instruction):
         if not objects:
             return None, None
-        crops = [Image.fromarray(frame[y1:y2, x1:x2]) for (x1, y1, x2, y2) in [obj['box'] for obj in objects]]
+        crops = []
+        valid_indices = []
+        for idx, obj in enumerate(objects):
+            x1, y1, x2, y2 = obj['box']
+            # Ensure bounding box is valid and within frame
+            if x2 > x1 and y2 > y1 and x1 >= 0 and y1 >= 0 and x2 <= frame.shape[1] and y2 <= frame.shape[0]:
+                crops.append(Image.fromarray(frame[y1:y2, x1:x2]))
+                valid_indices.append(idx)
+        if not crops:
+            return None, None
         inputs = self.processor(text=[instruction]*len(crops), images=crops, return_tensors="pt", padding=True).to(self.device)
         with torch.no_grad():
             outputs = self.clip(**inputs)
             logits_per_image = outputs.logits_per_image.cpu().numpy().flatten()
         best_idx = int(np.argmax(logits_per_image))
-        return objects[best_idx], logits_per_image[best_idx]
+        selected_idx = valid_indices[best_idx]
+        return objects[selected_idx], logits_per_image[best_idx]
 
     def estimate_distance(self, box, frame_shape):
         # Simple: use box height as proxy for distance
